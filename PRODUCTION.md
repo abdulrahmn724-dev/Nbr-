@@ -1,84 +1,81 @@
-# NBR — Production notes
+# NBR — منجرة نبر · Production notes
 
 Static site (HTML + CSS + vanilla JS, no build step). Arabic / RTL.
 The repo root **is** the web root: deploy the root directory as-is to any
 static host (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3, nginx…).
 
-## What's in here
+Built from the Claude Design source (`HANDOFF.md` + loose page files). The
+design is unchanged — `assets/styles.css` is untouched.
+
+## Structure & URLs
+
+Clean URLs use the **directory-per-page** convention — no server rewrites
+needed; every static host serves `dir/index.html` at `/dir`:
 
 ```
-index.html              # Home page — served at /
+index.html             ->  /            (Home)
+carpentry/index.html    ->  /carpentry   (Woodwork & Carpentry)
+workshops/index.html    ->  /workshops   (Kids workshops)
+consulting/index.html   ->  /consulting  (Consulting)
 assets/
-  styles.css            # design system (unchanged — source of truth)
-  fonts.css             # @font-face for the self-hosted fonts
-  fonts/*.woff2         # self-hosted fonts (no Google Fonts CDN dependency)
-  app.js                # interactions, data, form handler
-  image-slot.js         # <image-slot> web component
-images/                 # photography + logo.jpg
-design-export/          # original Claude Design standalone bundle (NOT deployed; reference only)
+  styles.css           # design system (unchanged — source of truth)
+  app.js               # interactions, data, form handler
+  image-slot.js        # <image-slot> web component
+images/                # all photography + nbr-logo.png
+HANDOFF.md             # original design handoff
 ```
 
-This source was reconstructed from the Claude Design standalone bundle
-(`design-export/NBR Home (standalone).html`): CSS/JS/images/fonts were
-externalised into the files above. The design is unchanged.
+All asset paths are **root-relative** (`/assets/…`, `/images/…`), so pages
+work at any depth. Fonts load from Google Fonts via `<link>` (unchanged from
+the source). Verified locally: all four routes and every asset return `200`.
 
 ## Before launch — action items
 
-1. **Form endpoint.** `assets/app.js` posts the contact form to a Formspree
-   endpoint via a placeholder. Search for `FORMSPREE_ENDPOINT` and replace the
-   string with your real endpoint, e.g.:
+1. **Form endpoint (required).** `assets/app.js` posts the contact form to
+   Formspree via a placeholder. Search for `FORMSPREE_ENDPOINT` and replace
+   the string with your real endpoint:
    ```js
    const FORMSPREE_ENDPOINT = "https://formspree.io/f/abcdwxyz";
    ```
    Create the form at https://formspree.io with the notification email set to
    **abdullah@nbr.sa**. Fields sent: `name`, `email`, `type`, `message`.
-   On success the form is hidden and `#formSuccess` is shown (unchanged
-   behaviour); on failure an inline error appears and the button re-enables.
+   On success the form hides and `#formSuccess` shows (unchanged behaviour);
+   on failure an inline error shows and the submit button re-enables.
 
-2. **The other three pages are not in the bundle.** Only the Home page was
-   exported. Carpentry / Workshops / Consulting must be exported from Claude
-   Design and added (see clean URLs below). Nav/footer links to them are
-   already wired and will 404 until the pages exist.
-
-3. **Missing gallery images.** `assets/app.js` `GALLERY` (the Carpentry
-   `#work` grid) references 15 images not in the bundle. They don't affect the
-   Home page (that grid only renders where `#gallery` exists). Add them under
-   `images/` when you ship the Carpentry page:
-   `g-awards, g-cafe-bar, g-calligraphy, g-coffee, g-console-cane,
-   g-console-stone, g-dessert-bar, g-door, g-facade, g-playroom, g-refectory,
-   g-vanity-blue, g-vanity-green, g-vanity-yellow, g-vases` (all `.jpeg`).
-
-## Clean URLs (`/`, `/carpentry`, `/workshops`, `/consulting`)
-
-All asset paths are **root-relative** (`/assets/…`, `/images/…`), so pages
-work at any URL depth. Use the **directory-per-page** convention — it needs no
-server rewrites and works on every static host:
-
-```
-index.html              ->  /
-carpentry/index.html     ->  /carpentry
-workshops/index.html     ->  /workshops
-consulting/index.html    ->  /consulting
-```
-
-So when you export the other pages, drop each one in as `<name>/index.html`.
-(If you'd rather keep flat `carpentry.html` files, most hosts can strip the
-`.html` — Netlify "Pretty URLs", Vercel `cleanUrls`, or an Apache
-`.htaccess` rewrite — but the directory approach above needs no config.)
+2. **Missing gallery image.** `assets/app.js` references
+   `images/g-console-cane.jpeg` (Carpentry `#work` gallery, "كونسول تلفاز"),
+   but it was not in the export — only `g-console-stone.jpeg` was. Add the file
+   to `images/`, or remove that one entry from the `GALLERY` array in
+   `assets/app.js`. (Home is unaffected.)
 
 ## Deploy
 
-1. Replace `FORMSPREE_ENDPOINT` (step 1 above).
-2. Point the host at the repo root as the publish/output directory.
-3. `design-export/` is reference material — exclude it from the deploy if your
-   host lets you, or just leave it (it isn't linked from the site).
+1. Replace `FORMSPREE_ENDPOINT` (item 1 above).
+2. Point the host's publish/output directory at the repo root.
+3. Map `nbr.sa` DNS to the host.
+
+Local preview: from the repo root run `python3 -m http.server` and open
+`http://localhost:8000/`.
+
+## Done (per HANDOFF "wire / decide before launch")
+
+- **Contact form** wired to Formspree (placeholder), success behaviour kept.
+- **Clean URLs** `/`, `/carpentry`, `/workshops`, `/consulting` across all
+  nav, footer, in-page links, and the works-rail link built in `app.js`.
+- **`og:image`** absolute (`https://nbr.sa/…`) on every page; added `og:url`
+  + `<link rel="canonical">` per page.
+- **Contact details** verified site-wide: `wa.me/966505509199`,
+  `tel:+966505509199`, `+966 50 550 9199`, `abdullah@nbr.sa`.
+- **EN `.lang-switch`** left as the intentional "coming soon" placeholder.
+- **Tweaks panel + EDITMODE** scripts removed from every page.
 
 ## Notes
 
-- `og:image` is absolute (`https://nbr.sa/…`); `og:url` + `<link rel=canonical>`
-  point at the production domain.
-- The EN `.lang-switch` is an intentional "coming soon" placeholder — left as-is.
-- The Claude Design "Tweaks" panel + EDITMODE script were removed for production.
-- `<image-slot>` elements load the real photo from their `src`; the click/drag
+- `NBR Woodwork.html` and the `(standalone)` bundles in the original zip are
+  not part of the 4-page site in HANDOFF.md, so they were left out. The
+  Woodwork page looks like an alternate landing/prototype — say the word if you
+  want it wired in (e.g. as a replacement for Carpentry).
+- `<image-slot>` elements load the real photo from `src`; their click/drag
   "replace image" behaviour persists only in the visitor's own browser
   (localStorage) and is harmless. Swap to plain `<img>` later if you prefer.
+- The original source zip remains on the `main` branch for reference.
