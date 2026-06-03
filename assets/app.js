@@ -18,7 +18,6 @@
     { cat: "زخرفي",  title: "لوحة مناظر متدرّجة",   cap: "فن التطعيم بمزيج من خشب الجوز والبلوط",         ar: "1200/1600", img: "/images/g-relief.jpeg" },
     { cat: "مغاسل",  title: "مغسلة رخامية",         cap: "أرجل خشبية مخروطة ضمن إطار من البلوط",          ar: "960/1280",  img: "/images/g-vanity-green.jpeg" },
     { cat: "تجاري",  title: "تجهيز «مقهى رتوة»",    cap: "مقاعد، فواصل خشبية، ونجارة متكاملة",            ar: "1600/1066", img: "/images/g-cafe-ratwah.jpeg" },
-    { cat: "خزائن",  title: "كونسول تلفاز",         cap: "هيكل جوز دافئ مع أبواب من الخيزران الكلاسيكي",  ar: "1200/1600", img: "/images/g-console-cane.jpeg" },
     { cat: "معماري", title: "درجات سلّمٍ معلّقة",   cap: "خشب صلب متين يكسو هيكلاً فولاذياً مخفياً",       ar: "900/1600",  img: "/images/g-stair.jpeg" },
     { cat: "زخرفي",  title: "مزهريات نحتية",        cap: "طقم من أربع قطع، نُحتت من أخشاب متنوعة",        ar: "904/1600",  img: "/images/g-vases.jpeg" },
     { cat: "أثاث",   title: "طاولة قهوة مقوّسة",    cap: "أرجل بلوط تحمل سطحاً زجاجياً بشفافية تامة",     ar: "900/1600",  img: "/images/g-coffee.jpeg" },
@@ -218,7 +217,7 @@
         // formspree.io with the notification email set to abdullah@nbr.sa.
         // Fields sent: name, email, type, message (see #quoteForm inputs).
         // ───────────────────────────────────────────────────────────
-        const FORMSPREE_ENDPOINT = "FORMSPREE_ENDPOINT";
+        const FORMSPREE_ENDPOINT = "FORM_SPREE_ENDPOINT_HERE";
         const btn = form.querySelector('button[type="submit"]');
 
         // lightweight error line (styling stays inline so styles.css is untouched)
