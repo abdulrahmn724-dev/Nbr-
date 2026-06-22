@@ -43,20 +43,28 @@ hooks so they hydrate from the payload without markup changes.
 ## Phases & status
 
 1. ✅ **Decouple client-rendered data** into `content/site.js` (`window.SITE`).
-2. ⬜ **Inventory + decouple page text / contact / sections** into the payload.
-3. ⬜ **Supabase schema + Storage bucket + RLS**; build the read path (`/api/content`).
-4. ⬜ **Auth** — client login for `/admin`.
-5. ⬜ **Admin UI** — gallery CRUD + image upload + reorder, then text/sections.
-6. ⬜ **Polish** — image optimization, drafts/publish, export/backup.
+2. ✅ **Supabase schema + Storage + RLS** — `supabase/schema.sql` (tables, RLS,
+   grants, seed) + `supabase/storage-policies.sql` (uploads).
+3. ✅ **Read path** — `api/site.js` serves `window.SITE` live from Supabase
+   (edge-cached), loaded after the static `content/site.js` fallback so the
+   site never breaks. Contact form saves to `contact_submissions` + WhatsApp.
+4. ✅ **Auth** — Supabase email/password login at `/admin`.
+5. ✅ **Admin UI** — `/admin`: gallery / works / woods CRUD + image upload +
+   reorder + publish toggle; contact messages (read-only).
+6. ⬜ **Page text / section toggles** — make headings/paragraphs editable.
+7. ⬜ **Polish** — image optimization, drafts/publish workflow, export/backup.
 
-## Supabase setup (client action — do in parallel)
+## Setup checklist (Supabase)
 
-1. supabase.com → **New project** (free tier; region near KSA).
-2. **Storage → New bucket** `images`, public.
-3. **Authentication → Users → Add user** — the client's admin email + password.
-4. Share the **Project URL** + **anon public key** (Settings → API).
-   Keep the `service_role` secret OUT of chat — it goes only into Vercel
-   server-side env vars later.
+Done: project created (region Mumbai), `images` bucket (public), admin user,
+keys wired into `assets/supabase-config.js` + `api/site.js`, `schema.sql` run.
 
-SQL schema (tables + RLS) will be added here once Phase 1b inventory is done,
-so the columns match every editable field.
+Remaining one-time step:
+- Run **`supabase/storage-policies.sql`** in the SQL Editor so the admin can
+  upload/replace/delete images in the `images` bucket.
+
+## Using the admin
+
+Visit **`/admin`**, log in with the Supabase user. Edit gallery/works/woods,
+upload images, reorder, toggle published. Changes appear on the site within
+~1 minute (read path is edge-cached for 60s).

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>لوحة تحكم منجرة نبر</title>
+<style>
+  :root{
+    --bg:#14110e; --panel:#1d1916; --panel2:#272019; --line:#3a3128;
+    --ink:#f3ece1; --soft:#b6a892; --accent:#9A3B2E; --accent2:#c0573f;
+    --ok:#3f9b6b; --r:12px; --sans:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  button{font-family:inherit;cursor:pointer}
+  input,textarea,select{font-family:inherit}
+  .hidden{display:none !important}
+
+  /* login */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:28px;width:100%;max-width:380px}
+  .card h1{font-size:22px;margin-bottom:4px}
+  .card p{color:var(--soft);font-size:14px;margin-bottom:20px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;color:var(--soft);margin-bottom:6px}
+  .field input,.field textarea,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px 12px;font-size:15px}
+  .field textarea{min-height:90px;resize:vertical}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:11px 18px;font-size:15px;font-weight:600}
+  .btn:hover{background:var(--accent2)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
+  .btn.danger{background:transparent;border:1px solid #6a2b24;color:#e0897e}
+  .msg{font-size:13px;margin-top:12px;min-height:18px}
+  .msg.err{color:#e0897e}
+  .msg.ok{color:#7fd0a3}
+
+  /* app */
+  #app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  aside{background:var(--panel);border-inline-start:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+  .brand{font-size:18px;font-weight:800;padding:6px 10px 16px}
+  .brand small{display:block;color:var(--soft);font-weight:400;font-size:12px;letter-spacing:1px}
+  .navbtn{text-align:start;background:transparent;border:0;color:var(--soft);padding:10px 12px;border-radius:9px;font-size:15px}
+  .navbtn:hover{background:var(--panel2);color:var(--ink)}
+  .navbtn.active{background:var(--accent);color:#fff}
+  aside .spacer{flex:1}
+  main{padding:26px 30px;overflow:auto}
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+  .head h2{font-size:22px}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+  .row img{width:64px;height:48px;object-fit:cover;border-radius:8px;background:var(--panel2);flex:none}
+  .row .grow{flex:1;min-width:0}
+  .row .t{font-weight:600}
+  .row .s{color:var(--soft);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge{font-size:12px;padding:3px 8px;border-radius:20px;border:1px solid var(--line);color:var(--soft)}
+  .badge.on{color:#7fd0a3;border-color:#2f5c44}
+  .badge.off{color:#e0897e;border-color:#6a2b24}
+  .ops{display:flex;gap:6px;align-items:center;flex:none}
+  .swatch{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);flex:none}
+
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:50}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);width:100%;max-width:520px;padding:24px}
+  .modal h3{font-size:19px;margin-bottom:16px}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-start;margin-top:8px}
+  .thumb{width:100%;max-height:180px;object-fit:cover;border-radius:9px;border:1px solid var(--line);margin-bottom:8px;background:var(--panel2)}
+  .hint{color:var(--soft);font-size:12px}
+  .topmsg{position:fixed;inset-block-start:14px;inset-inline-end:14px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-size:14px;z-index:80;max-width:340px}
+  .topmsg.err{border-color:#6a2b24;color:#e0897e}
+  .topmsg.ok{border-color:#2f5c44;color:#7fd0a3}
+  @media(max-width:640px){#app{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;border:0;border-block-end:1px solid var(--line)}aside .spacer{display:none}.brand{width:100%}}
+</style>
+</head>
+<body>
+
+<!-- ===== login ===== -->
+<section id="login">
+  <form class="card" id="loginForm">
+    <h1>لوحة تحكم منجرة نبر</h1>
+    <p>سجّل الدخول لإدارة محتوى الموقع.</p>
+    <div class="field">
+      <label for="email">البريد الإلكتروني</label>
+      <input type="email" id="email" autocomplete="username" required dir="ltr" />
+    </div>
+    <div class="field">
+      <label for="password">كلمة المرور</label>
+      <input type="password" id="password" autocomplete="current-password" required />
+    </div>
+    <button class="btn" type="submit" style="width:100%">دخول</button>
+    <div class="msg" id="loginMsg"></div>
+  </form>
+</section>
+
+<!-- ===== app ===== -->
+<section id="app" class="hidden">
+  <aside>
+    <div class="brand">نبر<small>لوحة التحكم</small></div>
+    <button class="navbtn active" data-sec="gallery">المعرض</button>
+    <button class="navbtn" data-sec="works">أعمال مختارة</button>
+    <button class="navbtn" data-sec="woods">مكتبة الأخشاب</button>
+    <button class="navbtn" data-sec="messages">رسائل التواصل</button>
+    <div class="spacer"></div>
+    <button class="navbtn" id="signout">تسجيل الخروج</button>
+  </aside>
+  <main>
+    <div class="head">
+      <h2 id="secTitle">المعرض</h2>
+      <button class="btn" id="addBtn">+ إضافة</button>
+    </div>
+    <div class="list" id="list"></div>
+  </main>
+</section>
+
+<div id="modalRoot"></div>
+<div id="topmsg"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/supabase-config.js"></script>
+<script src="/admin/admin.js"></script>
+</body>
+</html>
