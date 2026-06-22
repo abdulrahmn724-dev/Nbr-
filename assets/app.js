@@ -212,46 +212,27 @@
       });
       if (ok) {
         // ───────────────────────────────────────────────────────────
-        // Submit to Formspree. Replace FORMSPREE_ENDPOINT with your form's
-        // endpoint (e.g. "https://formspree.io/f/abcdwxyz") — create it at
-        // formspree.io with the notification email set to abdullah@nbr.sa.
-        // Fields sent: name, email, type, message (see #quoteForm inputs).
+        // Open WhatsApp to NBR with the form contents pre-filled, then show
+        // the success state. (Phase 2: also POST the same fields to Supabase
+        // so every submission is stored and visible in the admin panel.)
         // ───────────────────────────────────────────────────────────
-        const FORMSPREE_ENDPOINT = "FORM_SPREE_ENDPOINT_HERE";
-        const btn = form.querySelector('button[type="submit"]');
+        const WHATSAPP_NUMBER = "966505509199";
+        const data = {
+          name: $("#f-name").value.trim(),
+          email: $("#f-email").value.trim(),
+          type: $("#f-type").value,
+          message: $("#f-msg").value.trim()
+        };
+        const text =
+          "السلام عليكم، أرغب بالتواصل مع منجرة نبر 🌿\n\n" +
+          "الاسم: " + data.name + "\n" +
+          "البريد: " + data.email + "\n" +
+          "نوع المشروع: " + data.type + "\n" +
+          "التفاصيل: " + data.message;
+        window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(text), "_blank");
 
-        // lightweight error line (styling stays inline so styles.css is untouched)
-        let errBox = form.querySelector(".form-error");
-        if (!errBox) {
-          errBox = document.createElement("p");
-          errBox.className = "form-error";
-          errBox.setAttribute("role", "alert");
-          errBox.style.cssText = "margin-top:14px;color:#9A3B2E;font-size:14px;display:none";
-          form.appendChild(errBox);
-        }
-        errBox.style.display = "none";
-        if (btn) btn.disabled = true;
-
-        fetch(FORMSPREE_ENDPOINT, {
-          method: "POST",
-          headers: { "Accept": "application/json", "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: $("#f-name").value.trim(),
-            email: $("#f-email").value.trim(),
-            type: $("#f-type").value,
-            message: $("#f-msg").value.trim()
-          })
-        })
-          .then((res) => {
-            if (!res.ok) throw new Error("Request failed: " + res.status);
-            form.style.display = "none";
-            $("#formSuccess").classList.add("show");
-          })
-          .catch(() => {
-            if (btn) btn.disabled = false;
-            errBox.textContent = "تعذّر إرسال طلبك الآن. يرجى المحاولة مرة أخرى أو التواصل معنا عبر واتساب.";
-            errBox.style.display = "block";
-          });
+        form.style.display = "none";
+        $("#formSuccess").classList.add("show");
       }
     });
     $$("#quoteForm input, #quoteForm select, #quoteForm textarea").forEach((inp) => {
