@@ -165,46 +165,45 @@
       });
       if (ok) {
         // ───────────────────────────────────────────────────────────
-        // Submit to Formspree. Replace FORMSPREE_ENDPOINT with your form's
-        // endpoint (e.g. "https://formspree.io/f/abcdwxyz") — create it at
-        // formspree.io with the notification email set to abdullah@nbr.sa.
-        // Fields sent: name, email, type, message (see #quoteForm inputs).
+        // 1) Save the submission to Supabase (so it shows in the admin).
+        // 2) Open WhatsApp to NBR with the details pre-filled.
+        // Both are best-effort; the success state always shows.
         // ───────────────────────────────────────────────────────────
-        const FORMSPREE_ENDPOINT = "FORM_SPREE_ENDPOINT_HERE";
-        const btn = form.querySelector('button[type="submit"]');
+        const data = {
+          name: $("#f-name").value.trim(),
+          email: $("#f-email").value.trim(),
+          type: $("#f-type").value,
+          message: $("#f-msg").value.trim()
+        };
 
-        // lightweight error line (styling stays inline so styles.css is untouched)
-        let errBox = form.querySelector(".form-error");
-        if (!errBox) {
-          errBox = document.createElement("p");
-          errBox.className = "form-error";
-          errBox.setAttribute("role", "alert");
-          errBox.style.cssText = "margin-top:14px;color:#9A3B2E;font-size:14px;display:none";
-          form.appendChild(errBox);
-        }
-        errBox.style.display = "none";
-        if (btn) btn.disabled = true;
+        // 1) store in Supabase (anon insert allowed by RLS) — fire and forget
+        try {
+          const sb = window.NBR_SUPABASE;
+          if (sb && sb.url && sb.anonKey) {
+            fetch(sb.url + "/rest/v1/contact_submissions", {
+              method: "POST",
+              headers: {
+                "apikey": sb.anonKey,
+                "Authorization": "Bearer " + sb.anonKey,
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
+              },
+              body: JSON.stringify(data)
+            }).catch(function () {});
+          }
+        } catch (e) {}
 
-        fetch(FORMSPREE_ENDPOINT, {
-          method: "POST",
-          headers: { "Accept": "application/json", "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: $("#f-name").value.trim(),
-            email: $("#f-email").value.trim(),
-            type: $("#f-type").value,
-            message: $("#f-msg").value.trim()
-          })
-        })
-          .then((res) => {
-            if (!res.ok) throw new Error("Request failed: " + res.status);
-            form.style.display = "none";
-            $("#formSuccess").classList.add("show");
-          })
-          .catch(() => {
-            if (btn) btn.disabled = false;
-            errBox.textContent = "تعذّر إرسال طلبك الآن. يرجى المحاولة مرة أخرى أو التواصل معنا عبر واتساب.";
-            errBox.style.display = "block";
-          });
+        // 2) open WhatsApp with the details pre-filled
+        const text =
+          "السلام عليكم، أرغب بالتواصل مع منجرة نبر 🌿\n\n" +
+          "الاسم: " + data.name + "\n" +
+          "البريد: " + data.email + "\n" +
+          "نوع المشروع: " + data.type + "\n" +
+          "التفاصيل: " + data.message;
+        window.open("https://wa.me/966505509199?text=" + encodeURIComponent(text), "_blank");
+
+        form.style.display = "none";
+        $("#formSuccess").classList.add("show");
       }
     });
     $$("#quoteForm input, #quoteForm select, #quoteForm textarea").forEach((inp) => {
