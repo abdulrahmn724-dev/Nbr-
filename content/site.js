@@ -66,3 +66,4 @@ window.SITE = {
     ]
 };
 window.SITE.text = window.SITE.text || {};
+window.SITE.images = window.SITE.images || {};

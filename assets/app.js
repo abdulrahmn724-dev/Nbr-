@@ -9,13 +9,26 @@
   const toAr = (n) => String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[+d]);
   const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-  /* ---------- editable text overrides (managed in /admin) ---------- */
+  /* ---------- editable content overrides (managed in /admin) ---------- */
   (function () {
     var T = (window.SITE && window.SITE.text) || {};
+    function clean(html) {
+      var d = document.createElement("div");
+      d.innerHTML = html;
+      Array.prototype.forEach.call(
+        d.querySelectorAll("script,style,iframe,object,embed,link,meta"),
+        function (n) { n.remove(); }
+      );
+      Array.prototype.forEach.call(d.querySelectorAll("*"), function (n) {
+        Array.prototype.slice.call(n.attributes).forEach(function (a) {
+          if (/^on/i.test(a.name) || /^\s*javascript:/i.test(a.value)) n.removeAttribute(a.name);
+        });
+      });
+      return d.innerHTML;
+    }
     $$("[data-cms]").forEach(function (el) {
       var k = el.getAttribute("data-cms");
-      // only override plain-text elements, so styled headings stay intact
-      if (T[k] != null && T[k] !== "" && el.children.length === 0) el.textContent = T[k];
+      if (T[k] != null && T[k] !== "") el.innerHTML = clean(T[k]);  // sanitized; allows styled markup
     });
   })();
 

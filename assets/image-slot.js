@@ -57,7 +57,9 @@
       this.appendChild(this._img);
       this.appendChild(this._ph);
 
-      this._set(this.getAttribute("src") || "");
+      // admin can override a fixed image by its id (window.SITE.images[id])
+      var imgs = (window.SITE && window.SITE.images) || {};
+      this._set((this.id && imgs[this.id]) || this.getAttribute("src") || "");
     }
 
     _set(url) {

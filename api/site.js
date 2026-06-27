@@ -37,8 +37,11 @@ module.exports = async (req, res) => {
       fetch(SUPABASE_URL + "/rest/v1/content_text?select=key,value", { headers: h })
         .then(function (r) { return r.ok ? r.json() : []; })
     ]);
-    const text = {};
-    (textRows || []).forEach(function (t) { text[t.key] = t.value; });
+    const text = {}, images = {};
+    (textRows || []).forEach(function (t) {
+      if (t.key.indexOf("img:") === 0) images[t.key.slice(4)] = t.value;  // fixed-image overrides
+      else text[t.key] = t.value;
+    });
     const SITE = {
       gallery: gallery.map((g) => ({
         cat: g.cat, title: g.title, cap: g.caption, ar: g.aspect, img: g.image_path
@@ -47,7 +50,8 @@ module.exports = async (req, res) => {
         name: w.name, latin: w.latin, best: w.best, note: w.note, grad: w.grad
       })),
       works: works.map((w) => ({ img: w.image_path, cat: w.cat, title: w.title })),
-      text: text
+      text: text,
+      images: images
     };
     res.status(200).send("window.SITE = " + JSON.stringify(SITE) + ";");
   } catch (e) {

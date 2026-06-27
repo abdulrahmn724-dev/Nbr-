@@ -102,6 +102,7 @@
     var sec = state.section;
     if (sec === "messages") { $("#secTitle").textContent = "رسائل التواصل"; $("#addBtn").style.display = "none"; return loadMessages(); }
     if (sec === "texts") { $("#secTitle").textContent = "نصوص الصفحات"; $("#addBtn").style.display = "none"; return loadTexts(); }
+    if (sec === "images") { $("#secTitle").textContent = "صور الصفحات"; $("#addBtn").style.display = "none"; return loadImages(); }
     $("#addBtn").style.display = "";
     var t = TABLES[sec];
     $("#secTitle").textContent = t.title;
@@ -203,6 +204,53 @@
         b.addEventListener("click", function () {
           var key = b.dataset.resettext;
           $('[data-tkey="' + key + '"]').value = defs[key] || "";
+        });
+      });
+    });
+  }
+
+  // ---------- page images (fixed slots) ----------
+  function loadImages() {
+    var fields = window.IMAGE_FIELDS || [];
+    if (!fields.length) { $("#list").innerHTML = '<p class="hint">لا توجد صور قابلة للتعديل.</p>'; return; }
+    $("#list").innerHTML = '<p class="hint">جارٍ التحميل...</p>';
+    sb.from("content_text").select("key,value").then(function (r) {
+      var ov = {};
+      (r.data || []).forEach(function (row) { if (row.key.indexOf("img:") === 0) ov[row.key.slice(4)] = row.value; });
+      var pages = {};
+      fields.forEach(function (f) { (pages[f.page] = pages[f.page] || []).push(f); });
+      var LBL = { home: "الرئيسية", carpentry: "النجارة والأعمال", workshops: "الورش", consulting: "الاستشارات" };
+      $("#list").innerHTML = Object.keys(pages).map(function (pg) {
+        var rows = pages[pg].map(function (f) {
+          var cur = (ov[f.id] != null ? ov[f.id] : f.default);
+          return '<div class="row"><img src="' + esc(cur) + '" alt="" />' +
+            '<div class="grow"><div class="t">' + esc(f.label) + '</div><div class="s" dir="ltr">' + esc(f.id) + "</div></div>" +
+            '<div class="ops"><label class="btn ghost sm">رفع صورة<input type="file" accept="image/*" data-imgid="' + esc(f.id) + '" style="display:none" /></label>' +
+            '<button class="btn ghost sm" data-imgreset="' + esc(f.id) + '" data-def="' + esc(f.default) + '">الأصلية</button></div></div>';
+        }).join("");
+        return '<h3 style="margin:18px 4px 8px">' + (LBL[pg] || pg) + "</h3>" + rows;
+      }).join("");
+      $$("#list [data-imgid]").forEach(function (inp) {
+        inp.addEventListener("change", function () {
+          var file = inp.files && inp.files[0]; if (!file) return;
+          var id = inp.dataset.imgid;
+          toast("جارٍ رفع الصورة...");
+          uploadImage(file).then(function (url) {
+            return sb.from("content_text").upsert({ key: "img:" + id, value: url }).then(function (r) {
+              if (r.error) throw r.error;
+              toast("تم تحديث الصورة ✓", "ok"); loadImages();
+            });
+          }).catch(function (e) { toast("فشل الرفع: " + (e.message || e), "err"); });
+        });
+      });
+      $$("#list [data-imgreset]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          b.disabled = true;
+          sb.from("content_text").upsert({ key: "img:" + b.dataset.imgreset, value: b.dataset.def }).then(function (r) {
+            b.disabled = false;
+            if (r.error) return toast("تعذّر: " + r.error.message, "err");
+            toast("رجّعنا الأصلية ✓", "ok"); loadImages();
+          });
         });
       });
     });
