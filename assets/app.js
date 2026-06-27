@@ -30,6 +30,14 @@
       var k = el.getAttribute("data-cms");
       if (T[k] != null && T[k] !== "") el.innerHTML = clean(T[k]);  // sanitized; allows styled markup
     });
+    // stat counters: override the animation target (data-to)
+    $$("[data-cms-to]").forEach(function (el) {
+      var k = el.getAttribute("data-cms-to");
+      if (T[k] != null && T[k] !== "") {
+        var v = String(T[k]).replace(/[٠-٩]/g, function (d) { return "٠١٢٣٤٥٦٧٨٩".indexOf(d); });
+        el.setAttribute("data-to", v);
+      }
+    });
   })();
 
   /* ---------- DATA ---------- */

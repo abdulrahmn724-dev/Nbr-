@@ -180,8 +180,12 @@
       $("#list").innerHTML = Object.keys(pages).map(function (pg) {
         var rows = pages[pg].map(function (f) {
           var val = (ov[f.key] != null ? ov[f.key] : f.default);
-          return '<div class="row" style="flex-direction:column;align-items:stretch;gap:8px">' +
-            '<textarea data-tkey="' + esc(f.key) + '">' + esc(val) + "</textarea>" +
+          var label = f.type === "number" ? '<div class="s">' + esc(f.label) + "</div>" : "";
+          var control = f.type === "number"
+            ? '<input type="text" inputmode="numeric" data-tkey="' + esc(f.key) + '" value="' + esc(val) + '" />'
+            : '<textarea data-tkey="' + esc(f.key) + '">' + esc(val) + "</textarea>";
+          return '<div class="row" style="flex-direction:column;align-items:stretch;gap:6px">' +
+            label + control +
             '<div class="ops"><button class="btn sm" data-savetext="' + esc(f.key) + '">حفظ</button>' +
             '<button class="btn ghost sm" data-resettext="' + esc(f.key) + '">استرجاع الأصلي</button></div></div>';
         }).join("");
