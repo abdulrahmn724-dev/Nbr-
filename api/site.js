@@ -29,11 +29,16 @@ module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=600");
   try {
-    const [gallery, woods, works] = await Promise.all([
+    const h = { apikey: ANON_KEY, Authorization: "Bearer " + ANON_KEY };
+    const [gallery, woods, works, textRows] = await Promise.all([
       fetchTable("gallery", "cat,title,caption,aspect,image_path"),
       fetchTable("woods", "name,latin,best,note,grad"),
-      fetchTable("works", "image_path,cat,title")
+      fetchTable("works", "image_path,cat,title"),
+      fetch(SUPABASE_URL + "/rest/v1/content_text?select=key,value", { headers: h })
+        .then(function (r) { return r.ok ? r.json() : []; })
     ]);
+    const text = {};
+    (textRows || []).forEach(function (t) { text[t.key] = t.value; });
     const SITE = {
       gallery: gallery.map((g) => ({
         cat: g.cat, title: g.title, cap: g.caption, ar: g.aspect, img: g.image_path
@@ -41,7 +46,8 @@ module.exports = async (req, res) => {
       woods: woods.map((w) => ({
         name: w.name, latin: w.latin, best: w.best, note: w.note, grad: w.grad
       })),
-      works: works.map((w) => ({ img: w.image_path, cat: w.cat, title: w.title }))
+      works: works.map((w) => ({ img: w.image_path, cat: w.cat, title: w.title })),
+      text: text
     };
     res.status(200).send("window.SITE = " + JSON.stringify(SITE) + ";");
   } catch (e) {

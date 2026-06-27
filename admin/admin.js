@@ -101,6 +101,7 @@
   function loadSection() {
     var sec = state.section;
     if (sec === "messages") { $("#secTitle").textContent = "رسائل التواصل"; $("#addBtn").style.display = "none"; return loadMessages(); }
+    if (sec === "texts") { $("#secTitle").textContent = "نصوص الصفحات"; $("#addBtn").style.display = "none"; return loadTexts(); }
     $("#addBtn").style.display = "";
     var t = TABLES[sec];
     $("#secTitle").textContent = t.title;
@@ -161,6 +162,49 @@
           '<div class="s">' + esc(m.type || "") + " — " + esc(m.message || "") + "</div>" +
           '<div class="s">' + esc(d) + "</div></div></div>";
       }).join("");
+    });
+  }
+
+  // ---------- page texts ----------
+  function loadTexts() {
+    var fields = window.TEXT_FIELDS || [];
+    if (!fields.length) { $("#list").innerHTML = '<p class="hint">لا توجد حقول نصوص.</p>'; return; }
+    $("#list").innerHTML = '<p class="hint">جارٍ التحميل...</p>';
+    sb.from("content_text").select("key,value").then(function (r) {
+      var ov = {};
+      (r.data || []).forEach(function (row) { ov[row.key] = row.value; });
+      var pages = {};
+      fields.forEach(function (f) { (pages[f.page] = pages[f.page] || []).push(f); });
+      var LBL = { home: "الرئيسية", carpentry: "النجارة والأعمال", workshops: "الورش", consulting: "الاستشارات" };
+      $("#list").innerHTML = Object.keys(pages).map(function (pg) {
+        var rows = pages[pg].map(function (f) {
+          var val = (ov[f.key] != null ? ov[f.key] : f.default);
+          return '<div class="row" style="flex-direction:column;align-items:stretch;gap:8px">' +
+            '<textarea data-tkey="' + esc(f.key) + '">' + esc(val) + "</textarea>" +
+            '<div class="ops"><button class="btn sm" data-savetext="' + esc(f.key) + '">حفظ</button>' +
+            '<button class="btn ghost sm" data-resettext="' + esc(f.key) + '">استرجاع الأصلي</button></div></div>';
+        }).join("");
+        return '<h3 style="margin:18px 4px 8px">' + (LBL[pg] || pg) + "</h3>" + rows;
+      }).join("");
+      // defaults map for reset
+      var defs = {}; fields.forEach(function (f) { defs[f.key] = f.default; });
+      $$("#list [data-savetext]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var key = b.dataset.savetext, ta = $('[data-tkey="' + key + '"]');
+          b.disabled = true;
+          sb.from("content_text").upsert({ key: key, value: ta.value }).then(function (r) {
+            b.disabled = false;
+            if (r.error) return toast("تعذّر الحفظ: " + r.error.message, "err");
+            toast("تم الحفظ ✓", "ok");
+          });
+        });
+      });
+      $$("#list [data-resettext]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var key = b.dataset.resettext;
+          $('[data-tkey="' + key + '"]').value = defs[key] || "";
+        });
+      });
     });
   }
 

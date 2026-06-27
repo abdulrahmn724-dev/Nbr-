@@ -58,6 +58,7 @@
   .badge.off{color:#e0897e;border-color:#6a2b24}
   .ops{display:flex;gap:6px;align-items:center;flex:none}
   .swatch{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);flex:none}
+  #list textarea{width:100%;min-height:70px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 11px;font-family:inherit;font-size:14px;line-height:1.6;resize:vertical}
 
   /* modal */
   .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:50}
@@ -99,6 +100,7 @@
     <button class="navbtn active" data-sec="gallery">المعرض</button>
     <button class="navbtn" data-sec="works">أعمال مختارة</button>
     <button class="navbtn" data-sec="woods">مكتبة الأخشاب</button>
+    <button class="navbtn" data-sec="texts">نصوص الصفحات</button>
     <button class="navbtn" data-sec="messages">رسائل التواصل</button>
     <div class="spacer"></div>
     <button class="navbtn" id="signout">تسجيل الخروج</button>
@@ -117,6 +119,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/supabase-config.js"></script>
+<script src="/content/text-fields.js"></script>
 <script src="/admin/admin.js"></script>
 </body>
 </html>

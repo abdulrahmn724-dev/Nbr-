@@ -9,6 +9,16 @@
   const toAr = (n) => String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[+d]);
   const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
+  /* ---------- editable text overrides (managed in /admin) ---------- */
+  (function () {
+    var T = (window.SITE && window.SITE.text) || {};
+    $$("[data-cms]").forEach(function (el) {
+      var k = el.getAttribute("data-cms");
+      // only override plain-text elements, so styled headings stay intact
+      if (T[k] != null && T[k] !== "" && el.children.length === 0) el.textContent = T[k];
+    });
+  })();
+
   /* ---------- DATA ---------- */
   const GALLERY = (window.SITE && window.SITE.gallery) || [];
 

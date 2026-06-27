@@ -65,3 +65,4 @@ window.SITE = {
       { img: "/images/g-stair.jpeg",        cat: "أعمال معمارية", title: "درجات سلّمٍ معلّقة" }
     ]
 };
+window.SITE.text = window.SITE.text || {};
